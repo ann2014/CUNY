@@ -1,0 +1,50 @@
+---
+title: "R Week 2 Markdown"
+author: "Ann Liu-Ferrara"
+date: "July 27, 2016"
+output: html_document
+---
+
+In probability, "n choose r" means n! / (( n - r)! * r!).For example, "5 choose 3" evaluates to 10.
+R has built in functions for choose() and factorial(). This task is to write an alternative function to the choose() function.
+
+Create prob_factorial(), functioning as same as factorical()
+
+```{r}
+prob_factorial <- function(x) {
+  factorial_result <- 1
+  for (i in 1:x) {
+    factorial_result <- factorial_result * i
+}
+  return(factorial_result)
+}
+
+```
+
+Create prob_choose(), functioning as same as choose() 
+
+```{r}
+prob_choose = function(n, r) {
+  if (n < 0) message("n has to be an integer greater than 0")
+  if (r < 0) message("r has to be an integer greater than 0")
+  prob_factorial(n) / (prob_factorial(n - r) * prob_factorial(r))
+} 
+```
+
+Test prob_choose(), and compare results with choose()
+```{r}
+prob_choose (10, 5) 
+  
+choose(10, 5)
+
+```
+
+```{r, echo = FALSE}
+if (prob_choose(10, 5) == choose(10, 5)) {
+  message("The test is a success.")
+} else {
+  message("The test fails.")
+}
+
+```
+
