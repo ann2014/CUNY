@@ -1,0 +1,111 @@
+---
+title: "R Homework Assignment 4"
+author: "Ann Liu-Ferrara"
+date: "8/6/2016"
+output: html_document
+---
+
+Exploratory Data Analysis in R. Choose an interesting dataset and use R graphics to describe the data. 
+You may use base R graphics, or a graphics package of your choice. You should include at least one example of each of the following:
+. histogram
+. boxplot
+. scatterplot
+
+```{r}
+library(RCurl)
+library(ggplot2)
+library(plyr)
+library(reshape2)
+#install.packages("extrafont")
+library(extrafont)
+```
+
+Read in .csv file and rename Data 
+
+```{r, echo=TRUE}
+weightLoss.data <- getURL("https://raw.githubusercontent.com/ann2014/CUNY/master/WeightLoss.csv")
+weightLoss.data <- read.csv(text = weightLoss.data)
+head(weightLoss.data)
+
+names(weightLoss.data)[1] <- "id"
+names(weightLoss.data)[3:5] <- c("WeightLoss_month1", "WeightLoss_month2", "WeightLoss_month3")
+names(weightLoss.data)[6:8] <- c("SelfEsteem_month1", "SelfEsteem_month2", "SelfEsteem_month3")
+
+wl.data <- melt(weightLoss.data[, 1:5], id.vars = c("id", "group"))
+names(wl.data)[3:4] <- c("WeightLoss_Month", "WeightLoss")
+we.data <- melt(weightLoss.data[, c(1,2,6,7,8)], id.vars = c("id", "group"))
+names(we.data)[3:4] <- c("SelfEsteem_Month", "SelfEsteem_Score")
+data.long <- cbind(wl.data, we.data)[, -5:-6]
+
+str(weightLoss.data)
+
+summary(weightLoss.data)
+
+# Use Weight Loss (pounds) as categorical data, run weight loss frequence by group
+table(weightLoss.data$group, weightLoss.data$WeightLoss_month1)
+```
+
+Creating Histograms: use histograms to view the distribution of one-dimensional data
+
+```{r}
+a <- ggplot(data.long, aes(x=as.factor(WeightLoss), fill=group))
+a <- a + labs(x = "Weight in pounds", y = "Count", title = "Weight Loss by Group within 3 months")
+a <- a + geom_bar() 
+a <- a + facet_grid (WeightLoss_Month ~ group)
+a <- a + geom_line(aes(y = SelfEsteem_Score, fill=group)) 
+a <- a + geom_point(aes(y = SelfEsteem_Score, colour = "blue"))
+a <- a + theme(legend.position='bottom', panel.grid.major.x = element_blank(), 
+               panel.grid.minor.x = element_blank(),
+               panel.grid.minor.y = element_blank(), 
+               legend.key.size = unit(.5, "cm"), 
+               axis.ticks.y =element_blank(), 
+               plot.margin = unit( c(1,0,0,0) , units = "lines" ),
+               plot.title = element_text(size = 30, lineheight = .8,
+                                         vjust = 1, family = "Bauhaus 93"))
+a <- a + scale_fill_discrete(guide_legend(title ="Group")) 
+a
+```
+
+Create Scatter Plots
+
+```{r}
+ggplot(weightLoss.data, aes(x= WeightLoss_month1, y = SelfEsteem_month1, color = group)) + 
+  labs(x = "Weight Loss", y = "Self-Esteem Score", title = "Weight Loss vs. Self-Esteem - Month 1") +
+  geom_point() + #geom_line() +
+  facet_wrap(~ group)
+
+ggplot(weightLoss.data, aes(x= WeightLoss_month2, y = SelfEsteem_month2, color = group)) + 
+  labs(x = "Weight Loss", y = "Self-Esteem Score", title = "Weight Loss vs. Self-Esteem - Month 2") +
+  geom_point() + #geom_line() +
+  facet_wrap(~ group)
+
+ggplot(weightLoss.data, aes(x= WeightLoss_month3, y = SelfEsteem_month3, color = group)) + 
+  labs(x = "Weight Loss", y = "Self-Esteem Score", title = "Weight Loss vs. Self-Esteem - Month 3") +
+  geom_point() + #geom_line() +
+  facet_wrap(~ group)
+```
+
+Create Boxplots
+
+```{r}
+ggplot(weightLoss.data) + 
+  geom_boxplot(aes(x=group, y=WeightLoss_month1)) + coord_flip() +
+  geom_boxplot(aes(x=group, y=SelfEsteem_month1), fill = "chartreuse4") +
+  labs(x = "Group", y = "Weight Loss      Self-Esteem Score", title = "Weight Loss vs. Self-Esteem - Month 1") 
+  
+ggplot(weightLoss.data) + 
+  geom_boxplot(aes(x=group, y=WeightLoss_month2)) + coord_flip() +
+  geom_boxplot(aes(x=group, y=SelfEsteem_month2), fill = "chartreuse4") +
+  labs(x = "Group", y = "Weight Loss      Self-Esteem Score", title = "Weight Loss vs. Self-Esteem - Month 2") 
+
+ggplot(weightLoss.data) + 
+  geom_boxplot(aes(x=group, y=WeightLoss_month3)) + coord_flip() +
+  geom_boxplot(aes(x=group, y=SelfEsteem_month3), fill = "chartreuse4") +
+  labs(x = "Group", y = "Weight Loss      Self-Esteem Score", title = "Weight Loss vs. Self-Esteem - Month 3") 
+
+```
+
+The graphic data visualization provides clear pictures of the relationships between weight loss and self-esteem during 3-month weight loss program. Three groups in the research also  showed different pattern regarding self-esteem measurement:
+- The more weight loss associated with higher self-esteem.
+- The DietEx group lost more weight, and control group lost least weight in the first 2 months, the data are showing same pattern at month 3.
+- The longer into the program, the less the weight loss.
