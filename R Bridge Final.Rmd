@@ -1,0 +1,76 @@
+---
+title: "R Bridge Final"
+author: "Ann Liu-Ferrara"
+date: "August 8, 2016"
+output: html_document
+---
+
+This is R Bridage Final project. Data are a subset of hflights. Visualizing the airline arrival delay and depature delay by carriers, and exploring the relationships delays with other factors.
+
+```{r}
+library(hflights)
+library(ggplot2)
+```
+Subsetting data and displaying descriptive summary statistics
+```{r}
+sub.delay <- hflights[hflights$Month == 12, 
+                c("ArrDelay", "DepDelay", "UniqueCarrier", "DayOfWeek",
+                  "AirTime", "Year", "Month", "DepTime", "Distance")]
+
+str(sub.delay)
+head(sub.delay)
+summary(sub.delay)
+```
+Facet the delays by Day of Week
+```{r}
+ggplot(sub.delay, aes(x = as.factor(ArrDelay))) + geom_bar() + 
+  coord_cartesian(xlim = c(0, 200)) +
+  facet_wrap(~DayOfWeek, nrow = 1) +
+  xlab("Arrival Delay") + 
+  ylab("frequency")+
+  labs(title = "Arrival Delay by Day of the Week in Dec. of 2011") 
+
+ggplot(sub.delay, aes(x = as.factor(DepDelay))) + geom_bar() + 
+  coord_cartesian(xlim = c(0, 200))  + 
+  facet_wrap(~DayOfWeek, nrow = 1) +
+  xlab("Departure Delay") + 
+  ylab("frequency")+
+  labs(title = "Depature Delay by Day of the Week in Dec. of 2011") 
+
+```
+Rank carriers by delay frequence and explore relationships between delays and distance.
+```{r}
+ggplot(sub.delay[, c("ArrDelay", "UniqueCarrier")], 
+       aes(x=reorder(UniqueCarrier, UniqueCarrier,
+                         function(x)-length(x)))) + geom_bar() +
+  xlab("Arrival Delay by Carrier") + 
+  ylab("Arrival Delay")+
+  labs(title = "Arrival Delay by Carriers in Dec. of 2011") 
+  
+ggplot(sub.delay[, c("DepDelay", "UniqueCarrier")], 
+       aes(x=reorder(UniqueCarrier, UniqueCarrier,
+                     function(x)-length(x)))) + geom_bar() +
+  xlab("Depature Delay") + 
+  ylab("Departure Delay") +
+  labs(title = "Depature Delay by Carriers in Dec. of 2011") 
+
+ggplot(sub.delay[sub.delay$ArrDelay > 0, c("ArrDelay", "DepDelay")],
+       aes(x = DepDelay, y = ArrDelay)) + geom_point() +
+       xlab("Depature Delay") + 
+       ylab("Arrival Delay") +
+       labs(title = "Depature Delay vs. Arrival Delay in Dec. of 2011") 
+
+ggplot(sub.delay[sub.delay$ArrDelay > 0, c("ArrDelay", "Distance")],
+       aes(x = Distance, y = ArrDelay)) + geom_point()+
+  xlab("Distance") + 
+  ylab("Arrival Delay") +
+  labs(title = "Distance vs. Arrival Delay in Dec. of 2011") 
+
+```
+
+The observations show:
+  - Delay data have outliers.
+  - Departure delay leads to arrival delay.
+  - Delays are the highest on Friday
+  - The carriers on the top frequency of delay list: XE, CO, WN, and OO.
+  - Distance has no direct impact on delays.
